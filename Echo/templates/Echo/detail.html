@@ -1,0 +1,17 @@
+{% extends "main/base.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+  
+  <ul>
+    <li> DeviceID  : {{Screen_info.devieNumber}}</li>
+    <li> Car Registration  : {{Screen_info.carRegNumber}}</li>
+    <li> Car Owner  : {{Screen_info.carOwner}}</li>
+    <li> Car Driver  : {{Screen_info.carDriver}}</li>
+    <li> Car Model  : {{Screen_info.carModel}}</li>
+    <li> Active Flag : {{Screen_info.activeFlag}}</li>
+
+  </ul>
+{% endblock %}
+

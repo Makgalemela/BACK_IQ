@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+
+
+
+{% extends "main/base.html" %}
+{% load crispy_forms_tags %}
+
+
+{% block content %}
+    <h1 > Thank you for visiting IQ media</h1>
+    <html>
+      <head>
+        <style>
+           /* Set the size of the div element that contains the map */
+         
+
+        </style>
+      </head>
+      <body>
+
+        <h3>IQ MEDIA DEVICE LOCATIONS</h3>
+        <!--The div element for the map -->
+        <div id="map" style="height:400px ; width: 100% "></div>
+        <script>
+    // Initialize and add the map
+    function initMap() {
+      // The location of Uluru
+      var uluru = {lat: -29, lng: 24};
+      // The map, centered at Uluru
+      var map = new google.maps.Map(
+          document.getElementById('map'), {zoom: 4, center: uluru});
+      // The marker, positioned at Uluru
+      var marker = new google.maps.Marker({position: uluru, map: map});
+    }
+        </script>
+        <!--Load the API from the specified URL
+        * The async attribute allows the browser to render the page while the API loads
+        * The key parameter will contain your own API key (which is not needed for this tutorial)
+        * The callback parameter executes the initMap() function
+        -->
+        <script async defer
+        src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBYC22PugjYu7b_8zQdJpF2Pn3HaWN0FY0&callback=initMap">
+        </script>
+      </body>
+    </html>
+
+
+{% endblock %}

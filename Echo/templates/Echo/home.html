@@ -1,0 +1,264 @@
+
+{% extends "main/base.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+ <fieldset class="form-group">
+            <legend class="border-bottom mb-4">Device Query</legend>
+             {% csrf_token %}
+            {{form|crispy}}
+  </fieldset>
+  
+
+ <table class="table table-hover">
+  <thead>
+    <tr>
+      <th scope="col">#</th>
+      <th scope="col">Device ID</th>
+      <th scope="col">Status</th>
+      <th scope="col">Location</th>
+    </tr>
+  </thead>
+  <tbody>
+  	{% for rows in screen %}
+    <tr>
+      <th scope="row">{{rows.pk}}</th>
+      <td><a class="DeviceSelecter" data-pk={{rows.pk}} class="nav-item nav-link"  data-toggle="modal" data-target="#myDetails" href="{% url 'user_profile' %}">{{rows.deviceNumber}}</a></td>
+      	{% if rows.activeFlag == True  %}
+      <td style="color: green">Online</td>
+      	{% else%}
+      <td style="color: red">Offline</td>
+      	{% endif %}
+      <td> <a class="DeviceLocation" data-long={{rows.longitude}} data-lati= {{rows.latitude}} class="nav-item nav-link"  data-toggle="modal" data-target="#myModal" href="{% url 'user_profile' %}">LOCATE</a></td>
+    </tr>
+
+    {% endfor %}
+
+
+
+
+    <div class="container">
+ 
+
+  <!-- Modal -->
+  <div class="modal fade" id="myModal" role="dialog">
+    <div class="modal-dialog">
+   
+
+      ...
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+         <!--  <button type="button" class="close" data-dismiss="modal">&times;</button> -->
+          <h4 class="modal-title">IQ MEDIA DEVICE LOCATION</h4>
+        </div>
+        <div class="modal-body">
+        <div id='map' style='width: 400px; height: 300px;' ></div> -->
+        <script >
+    // Initialize and add the map
+ 
+      // The location of Uluru
+      var latitude;
+      var longetude;
+
+      $('.DeviceLocation').click(function() {            
+  			 latitude = parseFloat($(this).attr('data-long'));
+  			 longitude = parseFloat($(this).attr('data-lati'));
+        mapboxgl.accessToken = 'pk.eyJ1Ijoic2Nocm9vZGluZ2VyIiwiYSI6ImNrMnpmbGthbzBnenQzbW9tbGJqbTN2d3UifQ.Dkye4BD0DH1eVWbDUqBmPw';
+        var map = new mapboxgl.Map({
+          container: 'map',
+          style: 'mapbox://styles/mapbox/streets-v11',
+          center : [longitude,latitude],
+          zoom: 14
+              });
+
+map.on('load', function() {
+map.addLayer({
+'id': 'off-leash-areas',
+'type': 'symbol',
+// data from opendata.cityofboise.org/
+'source': {
+'type': 'geojson',
+'data': 'https://docs.mapbox.com/mapbox-gl-js/assets/boise.geojson'
+ 
+},
+"layout": {
+"icon-image": 'dog-park-11',
+"text-field": ['format',
+['upcase', ['get', 'FacilityName']], { 'font-scale': .8 },
+'\n', {},
+['downcase', ['get', 'Comments']], { 'font-scale': .6 }],
+"text-font": ["Open Sans Semibold", "Arial Unicode MS Bold"],
+"text-offset": [0, 0.6],
+"text-anchor": "top"
+}
+});
+ 
+});
+
+        map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new mapboxgl.FullscreenControl());
+        var size = 150;
+ 
+// implementation of CustomLayerInterface to draw a pulsing dot icon on the map
+// see https://docs.mapbox.com/mapbox-gl-js/api/#customlayerinterface for more info
+var pulsingDot = {
+width: size,
+height: size,
+data: new Uint8Array(size * size * 4),
+ 
+// get rendering context for the map canvas when layer is added to the map
+onAdd: function() {
+var canvas = document.createElement('canvas');
+canvas.width = this.width;
+canvas.height = this.height;
+this.context = canvas.getContext('2d');
+},
+ 
+// called once before every frame where the icon will be used
+render: function() {
+var duration = 1000;
+var t = (performance.now() % duration) / duration;
+ 
+var radius = size / 2 * 0.3;
+var outerRadius = size / 2 * 0.7 * t + radius;
+var context = this.context;
+ 
+// draw outer circle
+context.clearRect(0, 0, this.width, this.height);
+context.beginPath();
+context.arc(this.width / 2, this.height / 2, outerRadius, 0, Math.PI * 2);
+context.fillStyle = 'rgba(255, 200, 200,' + (1 - t) + ')';
+context.fill();
+ 
+// draw inner circle
+context.beginPath();
+context.arc(this.width / 2, this.height / 2, radius, 0, Math.PI * 2);
+context.fillStyle = 'rgba(255, 100, 100, 1)';
+context.strokeStyle = 'white';
+context.lineWidth = 2 + 4 * (1 - t);
+context.fill();
+context.stroke();
+ 
+// update this image's data with data from the canvas
+this.data = context.getImageData(0, 0, this.width, this.height).data;
+ 
+// continuously repaint the map, resulting in the smooth animation of the dot
+map.triggerRepaint();
+ 
+// return `true` to let the map know that the image was updated
+return true;
+}
+};
+ 
+map.on('load', function () {
+ 
+map.addImage('pulsing-dot', pulsingDot, { pixelRatio: 2 });
+ 
+map.addLayer({
+"id": "points",
+"type": "symbol",
+"source": {
+"type": "geojson",
+"data": {
+"type": "FeatureCollection",
+"features": [{
+"type": "Feature",
+"geometry": {
+"type": "Point",
+"coordinates": [ longitude,latitude]
+}
+}]
+}
+},
+"layout": {
+"icon-image": "pulsing-dot"
+}
+});
+});
+  			 
+  	
+	   });
+
+
+        </script>
+      
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+    
+  </tbody>
+</table>
+
+
+<!-- Details Model -->
+
+<div class="container">
+ 
+  <!-- Trigger the modal with a button -->
+ 
+  <!-- Modal -->
+  <div class="modal fade" id="myDetails" role="dialog">
+    <div class="modal-dialog">
+    
+      <!-- Modal content-->
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+         <!--  <h4 class="modal-title">Details</h4> -->
+        </div>
+        <div class="modal-body">
+
+        
+
+			<div  style="font-size:30px;"  id ="deviceNumber"></div>
+			<div  style="font-size:30px;"  id ="Registration"></div>
+			<div style="font-size:30px;" id ="Owner"></div>
+			<div style="font-size:30px;" id ="Driver"></div>
+			<div style="font-size:30px;" id ="Model"></div>
+			<div style="font-size:30px;" id ="Status"></div>
+      <div style="font-size:30px;" id ="Date"></div>
+      <div style="font-size:30px;" id ="lastknown"></div>
+        </div>
+        <script>
+        	
+        	$('.DeviceSelecter').click(function() {            
+  					var pk_key = parseInt($(this).attr('data-pk'));
+  					
+  					${% for items in screen %}
+  					if(pk_key == {{ items.pk }}){
+
+	  					$("#deviceNumber").text("Device ID: 		"+ "{{ items.deviceNumber }}");
+	  					$("#Registration").text("Registration Number: 		"+"{{ items.carRegNumber }}");
+	  					$("#Owner").text("Car Owner: 		"+ "{{ items.carOwner }}");
+	  					$("#Driver").text("Car Driver: 		"+"{{ items.carDriver }}");
+	  					$("#Model").text("Car Model: 		"+"{{ items.carModel }}");
+	  					$("#Status").text("Status: 		"+"{{ items.activeFlag }}");
+              $("#lastknown").text("Last Known Loc:    "+"{{ items.lastknown }}");
+              $("#Date").text("Date:    "+"{{ items.date }}");
+  					}
+
+  					${% endfor %}
+				});
+ 	
+        </script>
+        	
+        <div class="modal-footer">
+          <p> &copy Copyright IQ media 2019</p>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
+
+{% endblock %}
